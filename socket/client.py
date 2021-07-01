@@ -1,13 +1,15 @@
 import pygame
 from network import Network
 import pickle
+import math
+from Player import Player
+from Data import Data
 pygame.font.init()
 
 width = 700
 height = 700
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Client")
-
 
 class Button:
     def __init__(self, text, x, y, color):
@@ -33,7 +35,7 @@ class Button:
             return False
 
 
-def redrawWindow(win, game, p):
+def redrawWindow(win, game, p, p1, p2):
     win.fill((128,128,128))
 
     if not(game.connected()):
@@ -47,6 +49,12 @@ def redrawWindow(win, game, p):
 
         text = font.render("Opponents", 1, (0, 255, 255))
         win.blit(text, (380, 200))
+        try:
+            p2.update_attr(game.players[1-p])
+        except:
+            pass
+        p1.draw(win)
+        p2.draw(win)
 
         move1 = game.get_player_move(0)
         move2 = game.get_player_move(1)
@@ -88,26 +96,31 @@ def main():
     n = Network()
     player = int(n.getP())
     print("You are player", player)
+    p1 = Player(200, 410, 64,64)
+    p2 = Player(200, 410, 64,64)
+
 
     while run:
         clock.tick(60)
         try:
-            game = n.send("get")
+            data = Data("get",p1)
+            game = n.send(data)
         except:
             run = False
             print("Couldn't get game")
             break
 
         if game.bothWent():
-            redrawWindow(win, game, player)
+            redrawWindow(win, game, player, p1, p2)
             pygame.time.delay(500)
             try:
-                game = n.send("reset")
+                data = Data("reset",None)
+                game = n.send(data)
             except:
                 run = False
                 print("Couldn't get game")
                 break
-
+            
             font = pygame.font.SysFont("comicsans", 90)
             if (game.winner() == 1 and player == 1) or (game.winner() == 0 and player == 0):
                 text = font.render("You Won!", 1, (255,0,0))
@@ -126,17 +139,48 @@ def main():
                 pygame.quit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
                 for btn in btns:
                     if btn.click(pos) and game.connected():
                         if player == 0:
                             if not game.p1Went:
-                                n.send(btn.text)
+                                data = Data("click",btn.text)
+                                n.send(data)
                         else:
                             if not game.p2Went:
-                                n.send(btn.text)
+                                data = Data("click",btn.text)
+                                n.send(data)
+                
 
-        redrawWindow(win, game, player)
+        #game1 character
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a] and p1.x > p1.vel:
+            p1.x -= p1.vel
+            p1.left = True
+            p1.right = False
+            p1.standing = False
+        elif keys[pygame.K_d] and p1.x < 500 - p1.width - p1.vel:
+            p1.x += p1.vel
+            p1.right = True
+            p1.left = False
+            p1.standing = False
+        elif keys[pygame.K_w] and p1.y > p1.vel:
+            p1.y -= p1.vel
+            p1.left = False
+            p1.right = False
+            p1.standing = True
+            p1.walkCount = 0
+        elif keys[pygame.K_s] and p1.y < 500 - p1.width - p1.vel:
+            p1.y += p1.vel
+            p1.left = False
+            p1.right = False
+            p1.standing = True
+            p1.walkCount = 0
+        pos = pygame.mouse.get_pos()
+        dx = pos[0] - (p1.x+p1.width)
+        dy = pos[1] - (p1.y+p1.height)
+        p1.angle = math.atan2(-dy,dx)*180/math.pi
+
+        redrawWindow(win, game, player, p1, p2)
 
 def menu_screen():
     run = True

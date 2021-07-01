@@ -7,6 +7,8 @@ class Game:
         self.moves = [None, None]
         self.wins = [0,0]
         self.ties = 0
+        self.chatroom = []
+        self.players = [None, None]
 
     def get_player_move(self, p):
         """
