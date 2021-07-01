@@ -36,16 +36,10 @@ clock = pygame.time.Clock()
 # build the grid
 def build_grid(x, y, w):
     grid=[]
-    for i in range(1,21):
-        x = 20                                                            # set x coordinate to start position
-        y = y + 20                                                        # start a new row
-        for j in range(1, 21):
-            pygame.draw.line(screen, WHITE, [x, y], [x + w, y])           # top of cell
-            pygame.draw.line(screen, WHITE, [x + w, y], [x + w, y + w])   # right of cell
-            pygame.draw.line(screen, WHITE, [x + w, y + w], [x, y + w])   # bottom of cell
-            pygame.draw.line(screen, WHITE, [x, y + w], [x, y])           # left of cell
-            grid.append((x,y))                                            # add cell to grid list
-            x = x + 20
+    pygame.draw.line(screen, WHITE, (20,20), (20,420))
+    pygame.draw.line(screen, WHITE, (20,20), (420, 20))
+    pygame.draw.line(screen,WHITE,(420,20),(420,420))
+    pygame.draw.line(screen, WHITE, (20,420), (420,420))
     pygame.draw.rect(screen,BLUE,[21,21,398,398])
     pygame.display.update()                                                                # move cell to new position
 
