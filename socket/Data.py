@@ -1,7 +1,7 @@
 class Data(object):
     def __init__(self,method,information):
         self.method = method                  #string
-        if self.method == "get":              #傳player的資訊給server
+        if self.method == "get_game":         #傳player的資訊給server
             try:
                 self.information = {}         #dict
                 self.information["x"] = information.x

@@ -1,6 +1,5 @@
 import pygame
 from network import Network
-import pickle
 import math
 from Player import Player
 from Data import Data
@@ -11,8 +10,6 @@ height = 700
 win = pygame.display.set_mode((width, height))
 cell_width = 32
 cell_height = 32
-horizontal_boundary = []
-vertical_boundary = []
 
 pygame.display.set_caption("Client")
 
@@ -34,40 +31,65 @@ def carve_out_maze(win, sets):
 
 def redrawWindow(win, game, p, p1, p2, map):
     win.fill((128,128,128))
-    if not(game.connected()):
-        font = pygame.font.SysFont("comicsans", 80)
-        text = font.render("Waiting for Player...", 1, (255,0,0), True)
-        win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
-    else:
-        try:
-            p2.update_attr(game.players[1-p])
-        except:
-            pass
-        p1.draw(win)
-        p2.draw(win)
-        carve_out_maze(win, map)
+    try:
+        p2.update_attr(game.players[1-p])
+    except:
+        pass
+    p1.draw(win)
+    p2.draw(win)
+    carve_out_maze(win, map)
     pygame.display.update()
 
 def main():
+    #client跟server連線
     run = True
     clock = pygame.time.Clock()
-    n = Network()
-    player = int(n.getP())
-    print("You are player", player)
-    data = Data("get_map",None)
-    map = n.send(data)
-    
-    if player == 0:# 我是player1
-        p1 = Player(cell_width, cell_height, 30,30)
-        p2 = Player(20*cell_width, 20*cell_height, 30,30)
-    else:          # 我是player2
-        p1 = Player(20*cell_width, 20*cell_height, 30,30)
-        p2 = Player(cell_width, cell_height, 30,30)
+    personal_data = "i am elsa"
+    n = Network(personal_data)
+
+    #client問server配對了沒
+    while True :
+        clock.tick(60)
+        try:
+            data = Data("get_game_start",None)
+            reply = n.send(data)
+            if reply:
+                data = Data("get_p",None)
+                player = n.send(data)
+                print("You are player", player)
+                data = Data("get_map",None)
+                map = n.send(data)
+                break
+            else:
+                win.fill((128,128,128))
+                font = pygame.font.SysFont("comicsans", 80)
+                text = font.render("Waiting for Pair...", 1, (255,0,0), True)
+                win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
+                pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                        pygame.quit()
+
+        except Exception as e:
+            print(e)
+            break 
+
+    #已經配對好了 開始玩遊戲
+    try:
+        if player == 0:# 我是player1
+            p1 = Player(cell_width, cell_height, 30,30)
+            p2 = Player(20*cell_width, 20*cell_height, 30,30)
+        else:          # 我是player2
+            p1 = Player(20*cell_width, 20*cell_height, 30,30)
+            p2 = Player(cell_width, cell_height, 30,30)
+    except:
+        run = False
 
     while run:
         clock.tick(60)
         try:
-            data = Data("get",p1)
+            data = Data("get_game",p1)
             game = n.send(data)
         except Exception as e:
             run = False
