@@ -3,6 +3,7 @@ import select
 from _thread import *
 import pickle
 from game import Game
+from maze import maze
 
 server = "192.168.1.101"
 port = 5555
@@ -27,29 +28,9 @@ print("Waiting for a connection, Server Started")
 sockets_list = [s]
 connected = set()
 games = {}
+maps = {}
 idCount = 0
 
-# Handles message receiving
-def receive_message(client_socket):
-
-    try:
-
-        # Receive our "header" containing message length, it's size is defined and constant
-        message_header = client_socket.recv(HEADER_LENGTH)
-
-        # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-        if not len(message_header):
-            return False
-
-        # Convert header to int value
-        message_length = int(message_header.decode('utf-8').strip())
-
-        # Return an object of message header and message data
-        return {'header': message_header, 'data': client_socket.recv(message_length)}
-
-    except:
-        return False
-    
 def threaded_client(conn, p, gameId):
     global idCount
     conn.send(str.encode(str(p)))
@@ -57,22 +38,21 @@ def threaded_client(conn, p, gameId):
     reply = ""
     while True:
         try:
-            data = pickle.loads(conn.recv(2048*4))
-            print(data)
+            data = pickle.loads(conn.recv(2048*2))
             if gameId in games:
                 game = games[gameId]
+                map = maps[gameId]
                 if not data:
                     break
                 else:
                     if data.method == "message":
                         pass
-                    elif data.method == "reset":
-                        game.resetWent()
-                    elif data.method == "click":
-                        game.play(p, data.information)
-                    else:
+                    elif data.method == "get":
                         game.players[p] = data.information
-                    conn.sendall(pickle.dumps(game))
+                        conn.sendall(pickle.dumps(game))
+                    elif data.method == "get_map":
+                        print("fuck you")
+                        conn.sendall(pickle.dumps(map))
             else:
                 break
         except Exception as e:
@@ -82,6 +62,7 @@ def threaded_client(conn, p, gameId):
     print("Lost connection")
     try:
         del games[gameId]
+        del maps[gameId]
         print("Closing Game", gameId)
     except:
         pass
@@ -97,6 +78,7 @@ while True:
     gameId = (idCount - 1)//2
     if idCount % 2 == 1:
         games[gameId] = Game(gameId)
+        maps[gameId] = maze().create()
         print("Creating a new game...")
     else:
         games[gameId].ready = True
