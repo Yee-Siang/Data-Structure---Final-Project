@@ -39,7 +39,6 @@ def redrawWindow(win, game, p, p1, p2, map):
         text = font.render("Waiting for Player...", 1, (255,0,0), True)
         win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
     else:
-
         try:
             p2.update_attr(game.players[1-p])
         except:
@@ -86,26 +85,12 @@ def main():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and p1.x > p1.vel:
             p1.x -= p1.vel
-            p1.left = True
-            p1.right = False
-            p1.standing = False
         elif keys[pygame.K_d] and p1.x < width - p1.width - p1.vel:
             p1.x += p1.vel
-            p1.right = True
-            p1.left = False
-            p1.standing = False
         elif keys[pygame.K_w] and p1.y > p1.vel:
             p1.y -= p1.vel
-            p1.left = False
-            p1.right = False
-            p1.standing = True
-            p1.walkCount = 0
         elif keys[pygame.K_s] and p1.y < height - p1.width - p1.vel:
             p1.y += p1.vel
-            p1.left = False
-            p1.right = False
-            p1.standing = True
-            p1.walkCount = 0
         pos = pygame.mouse.get_pos()
         dx = pos[0] - (p1.x+p1.width)
         dy = pos[1] - (p1.y+p1.height)
