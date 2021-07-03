@@ -21,16 +21,15 @@ print("Waiting for a connection, Server Started")
 # List of sockets for select.select()
 sockets_list = [s]
 connected = {}                    # id : [conn, p, gameid] id是personal_data的id 
-games = {}
-maps = {}
+games = {}                        #正在進行的遊戲
+maps = {}                         #遊戲的地圖
 idCount = 0                       #client連線人數
-pair = False
-data_dic = {}
-game_start = False
+data_dic = {}                     #在線成員的資料
+game_start = False                #統一進行遊戲
 game_start_time = 0
 current_time = 0
-game_time = 5
-state = "wait_for_pair"
+game_time = 5                     #遊戲進行的時間
+state = "wait_for_pair"           #server目前的狀態
 
 def threaded_client(conn, id):
     global connected
@@ -38,6 +37,7 @@ def threaded_client(conn, id):
     global game_start
     global data_dic
     running = game_start
+    client_state = "wait_for_pair"
     conn.send(str.encode(str("success")))
     while True:
         try:
@@ -47,22 +47,29 @@ def threaded_client(conn, id):
             else:
                 try:
                     if game_start :
+                        #所有人正在玩遊戲
                         p = connected[id][1]
                         gameId = connected[id][2]
                         game = games[gameId]
                         map = maps[gameId]
+                        client_state = "playing"
+                    else:
+                        client_state = "wait_for_pair"
                 except:
-                    break
+                    if game_start :
+                        #我的隊友斷線了
+                        client_state = "wait_for_pair"
+
                 if data.method == "message":
                     pass
                 elif data.method == "get_game":
                     game.players[p] = data.information
-                    game.state = state
+                    game.state = client_state
                     conn.sendall(pickle.dumps(game))
                 elif data.method == "get_map":
                     conn.sendall(pickle.dumps(map))
-                elif data.method == "get_game_start":
-                    conn.sendall(pickle.dumps(game_start))
+                elif data.method == "get_client_state":
+                    conn.sendall(pickle.dumps(client_state))
                 elif data.method == "get_p":
                     conn.sendall(pickle.dumps(p))
                     
@@ -117,8 +124,8 @@ start_new_thread(wait_for_connection, ())
 while True:
 
     try:
-        #人數到齊之後開始配對
-        if idCount == 2 and game_start == False and pair == False:
+        #人數到齊之後開始重新配對
+        if idCount == 2 and game_start == False :
             pair_list = make_pair(data_dic)
             for i in range(len(pair_list)):
                 p1_id = pair_list[i][0]
@@ -133,7 +140,6 @@ while True:
                 connected[p2_id][1] = 1
                 connected[p2_id][2] = i
             game_start = True
-            pair = True
             game_start_time = time.time()
             state = "playing_game"
 
@@ -142,10 +148,10 @@ while True:
         pass_time = current_time - game_start_time
         print("在線人數:",idCount)
         if pass_time >= game_time and game_start:
-            print(pass_time)
+            #遊戲時間結束
             state = "wait_for_pair"
             game_start = False
-            pair = False
+        
 
     except Exception as e:
             print("[EXCEPTION]", e)

@@ -1,6 +1,5 @@
 import pygame
 from network import Network
-from _thread import *
 import math
 from Player import Player
 from Data import Data
@@ -78,7 +77,6 @@ def play_game():
             state = game.state
             if state == "wait_for_pair":
                 play = False
-
         except Exception as e:
             print(e)
             play = False
@@ -105,10 +103,7 @@ def play_game():
         p1.angle = math.atan2(-dy,dx)*180/math.pi
         redrawWindow(win, game, player, p1, p2, map)
 
-
-
-
-#client跟server連線
+#connect_to_server
 run = True
 clock = pygame.time.Clock()
 n = Network(personal_data)
@@ -118,13 +113,13 @@ playing = False
 while True :
     clock.tick(60)
     try:
-        data = Data("get_game_start",None)
+        data = Data("get_client_state",None)
         reply = n.send(data)
-        if reply == True :
+        if reply == "playing" :
             #遊戲開始了
             play_game()
-        elif reply == False:
-            #遊戲還沒開始 等待配對
+        elif reply == "wait_for_pair":
+            #等待配對
             win.fill((128,128,128))
             font = pygame.font.SysFont("comicsans", 80)
             text = font.render("Waiting for Pair...", 1, (255,0,0), True)
@@ -134,6 +129,7 @@ while True :
                 if event.type == pygame.QUIT:
                     pygame.quit()
         else:
+            #不知道甚麼bug
             pygame.quit()
             n.client.close()
             break
