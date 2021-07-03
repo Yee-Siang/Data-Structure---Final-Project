@@ -1,5 +1,5 @@
 import pygame
-#from user_and_pair import *
+from user_and_pair import *
 
 
 def main():
@@ -191,7 +191,8 @@ def main():
                     posn = event.dict["pos"]
                     if (402 <= posn[0] <= 531) and (654 <= posn[1] <= 714):
                         #####重要:這些產生的資料將來要拿去class裏面做新的user#####
-                        new_user_dict = {'name':name, 'age':int(age), 'gender':gender, 'interest':interest, 'ideal_age':int(ideal_age), 'ideal_gender':ideal_gender}
+                        new_user = user(name, int(age), gender, interest, int(
+                            ideal_age), ideal_gender)
                         state = 4
                     ################################################
         if state == 4:
