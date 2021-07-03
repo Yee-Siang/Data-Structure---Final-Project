@@ -198,6 +198,11 @@ def play_game():
         if p1.health==0:
              play=False
         redrawWindow(win, game, player, p1, p2, map,bullet1,bullet2)
+    while p1.health==0:
+        myfont = pygame.font.Font(None,60)
+        textImage = myfont.render("game over", True, black)
+        screen.blit(textImage, (100,100))
+        pygame.display.update()
     
 
 
