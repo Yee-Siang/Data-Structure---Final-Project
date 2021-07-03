@@ -5,7 +5,7 @@ import time
 from game import Game
 from maze import maze
 
-server = "192.168.1.101"
+server = "192.168.56.1"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,7 +28,7 @@ data_dic = {}                     #在線成員的資料
 game_start = False                #統一進行遊戲
 game_start_time = 0
 current_time = 0
-game_time = 5                     #遊戲進行的時間
+game_time = 300                     #遊戲進行的時間
 state = "wait_for_pair"           #server目前的狀態
 
 def threaded_client(conn, id):
@@ -64,6 +64,7 @@ def threaded_client(conn, id):
                     pass
                 elif data.method == "get_game":
                     game.players[p] = data.information
+                    game.bullet[p]=data.information_bullet###
                     game.state = client_state
                     conn.sendall(pickle.dumps(game))
                 elif data.method == "get_map":
@@ -158,3 +159,4 @@ while True:
             break
 print("SERVER CRASHED")
     
+
