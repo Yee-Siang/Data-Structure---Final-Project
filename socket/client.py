@@ -1,8 +1,13 @@
 import pygame
 from network import Network
+from _thread import *
 import math
 from Player import Player
 from Data import Data
+
+personal_data = input("請輸入您的id:")
+personal_data = {"id":int(personal_data)}
+
 pygame.font.init()
 
 width = 700
@@ -27,7 +32,6 @@ def carve_out_maze(win, sets):
             if ((i, j-1), (i, j)) in sets or j == 0 and i != 0:
                 pygame.draw.line(win, (255, 255, 255), [(j+1)*cell_width, (i+1)*cell_height], [(j+1)*cell_width, (i+2)*cell_height])
     pygame.draw.line(win,(255, 255, 255),((20+1)*cell_width,cell_height),((20+1)*cell_width,20*cell_height))
-    pygame.display.update()
 
 def redrawWindow(win, game, p, p1, p2, map):
     win.fill((128,128,128))
@@ -40,65 +44,47 @@ def redrawWindow(win, game, p, p1, p2, map):
     carve_out_maze(win, map)
     pygame.display.update()
 
-def main():
-    #client跟server連線
-    run = True
-    clock = pygame.time.Clock()
-    personal_data = "i am elsa"
-    n = Network(personal_data)
 
-    #client問server配對了沒
-    while True :
-        clock.tick(60)
-        try:
-            data = Data("get_game_start",None)
-            reply = n.send(data)
-            if reply:
-                data = Data("get_p",None)
-                player = n.send(data)
-                print("You are player", player)
-                data = Data("get_map",None)
-                map = n.send(data)
-                break
-            else:
-                win.fill((128,128,128))
-                font = pygame.font.SysFont("comicsans", 80)
-                text = font.render("Waiting for Pair...", 1, (255,0,0), True)
-                win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
-                        pygame.quit()
+def play_game():
 
-        except Exception as e:
-            print(e)
-            break 
-
-    #已經配對好了 開始玩遊戲
+    play = True
     try:
+        #拿到player號碼
+        data = Data("get_p",None)
+        player = n.send(data)
+        print("You are player", player)
+
+        #拿到地圖
+        data = Data("get_map",None)
+        map = n.send(data)
+
         if player == 0:# 我是player1
             p1 = Player(cell_width, cell_height, 30,30)
             p2 = Player(20*cell_width, 20*cell_height, 30,30)
         else:          # 我是player2
             p1 = Player(20*cell_width, 20*cell_height, 30,30)
             p2 = Player(cell_width, cell_height, 30,30)
-    except:
-        run = False
+    except Exception as e:
+        print(e)
+        play = False
 
-    while run:
-        clock.tick(60)
+    while play:
+        #更新畫面
         try:
+            #拿到遊戲
             data = Data("get_game",p1)
             game = n.send(data)
+
+            state = game.state
+            if state == "wait_for_pair":
+                play = False
+
         except Exception as e:
-            run = False
-            print("Couldn't get game")
             print(e)
-            break
+            play = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pass
@@ -119,6 +105,46 @@ def main():
         p1.angle = math.atan2(-dy,dx)*180/math.pi
         redrawWindow(win, game, player, p1, p2, map)
 
+
+
+
+#client跟server連線
+run = True
+clock = pygame.time.Clock()
+n = Network(personal_data)
+playing = False
+
+#client問server遊戲開始了沒
+while True :
+    clock.tick(60)
+    try:
+        data = Data("get_game_start",None)
+        reply = n.send(data)
+        if reply == True :
+            #遊戲開始了
+            play_game()
+        elif reply == False:
+            #遊戲還沒開始 等待配對
+            win.fill((128,128,128))
+            font = pygame.font.SysFont("comicsans", 80)
+            text = font.render("Waiting for Pair...", 1, (255,0,0), True)
+            win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+        else:
+            pygame.quit()
+            n.client.close()
+            break
+    except Exception as e:
+        print(e)
+        pygame.quit()
+        n.client.close()
+        break 
+
+
+'''
 def menu_screen():
     run = True
     clock = pygame.time.Clock()
@@ -142,3 +168,4 @@ def menu_screen():
 
 while True:
     menu_screen()
+'''

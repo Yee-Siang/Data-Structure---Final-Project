@@ -9,10 +9,6 @@ server = "192.168.1.101"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# SO_ - socket option
-# SOL_ - socket option level
-# Sets REUSEADDR (as a socket option) to 1 on socket
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 try:
     s.bind((server, port))
@@ -28,19 +24,20 @@ connected = {}                    # id : [conn, p, gameid] id是personal_data的
 games = {}
 maps = {}
 idCount = 0                       #client連線人數
-id = 0                            #personal_data的id
-pair_list = [(0,1),(2,3)]         #配對的順序 兩兩一組
 pair = False
-data_list = []
+data_dic = {}
 game_start = False
-previous_time = 0
+game_start_time = 0
 current_time = 0
-game_time = 60*2
+game_time = 5
+state = "wait_for_pair"
 
 def threaded_client(conn, id):
     global connected
     global idCount
     global game_start
+    global data_dic
+    running = game_start
     conn.send(str.encode(str("success")))
     while True:
         try:
@@ -60,6 +57,7 @@ def threaded_client(conn, id):
                     pass
                 elif data.method == "get_game":
                     game.players[p] = data.information
+                    game.state = state
                     conn.sendall(pickle.dumps(game))
                 elif data.method == "get_map":
                     conn.sendall(pickle.dumps(map))
@@ -67,22 +65,29 @@ def threaded_client(conn, id):
                     conn.sendall(pickle.dumps(game_start))
                 elif data.method == "get_p":
                     conn.sendall(pickle.dumps(p))
+                    
         except Exception as e:
             print(e)
             break
     print("Lost connection")
     try:
+        del connected[id]
+        del data_dic[id]
         del games[gameId]
         del maps[gameId]
-        del connected[id]
         print("Closing Game", gameId)
     except:
         pass
     idCount -= 1
     conn.close()
-def make_pair(data_list):
-    pass
-    #return pair_list
+def make_pair(data_dic):
+    pair_list = []
+    value_list = list(data_dic.values())
+    for i in range(0,len(value_list),2):
+        pair_tup = (value_list[i]["id"],value_list[i+1]["id"])
+        pair_list.append(pair_tup)
+
+    return pair_list
 
 def wait_for_connection():
     """
@@ -90,19 +95,16 @@ def wait_for_connection():
     :return: None
     """
     global idCount
-    global id
     while True:
         try:
             conn, addr = s.accept()
             personal_data = pickle.loads(conn.recv(2048*2))
-            data_list.append(personal_data)
             print(f"[CONNECTION] {addr} connected to the server at {time.time()}")
 
-            #personal_data[id]
-            id = id
+            id = personal_data["id"]
+            data_dic[id] = personal_data
             connected[id] = [conn, None, None]
             start_new_thread(threaded_client, (conn, id))
-            id += 1
             idCount += 1
         except Exception as e:
             print("[EXCEPTION]", e)
@@ -113,10 +115,11 @@ start_new_thread(wait_for_connection, ())
 
 #server的主要邏輯
 while True:
+
     try:
         #人數到齊之後開始配對
-        if idCount == 4 and game_start == False and pair == False:
-            #pair_list = make_pair(data_list)
+        if idCount == 2 and game_start == False and pair == False:
+            pair_list = make_pair(data_dic)
             for i in range(len(pair_list)):
                 p1_id = pair_list[i][0]
                 p2_id = pair_list[i][1]
@@ -131,10 +134,19 @@ while True:
                 connected[p2_id][2] = i
             game_start = True
             pair = True
-            previous_time = time.time()
-        
-        
-        
+            game_start_time = time.time()
+            state = "playing_game"
+
+
+        current_time = time.time()
+        pass_time = current_time - game_start_time
+        print("在線人數:",idCount)
+        if pass_time >= game_time and game_start:
+            print(pass_time)
+            state = "wait_for_pair"
+            game_start = False
+            pair = False
+
     except Exception as e:
             print("[EXCEPTION]", e)
             break
