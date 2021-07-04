@@ -14,6 +14,8 @@ def connect_to_server(personal_data):
     win = pygame.display.set_mode((width, height))
     cell_width = 32
     cell_height = 32
+    image_1 = pygame.image.load('image/character.png')
+    image_1 = pygame.transform.scale(image_1, (30, 30))
 
     pygame.display.set_caption("Client")
 
@@ -33,11 +35,14 @@ def connect_to_server(personal_data):
     def redrawWindow(win, game, p, p1, p2, map):
         win.fill((128,128,128))
         try:
-            p2.update_attr(game.players[1-p])
+            if game.players[1-p] :
+                #p1,p2都更新了
+                p2 = game.players[1-p]
         except:
             pass
-        p1.draw(win)
-        p2.draw(win)
+        
+        win.blit(pygame.transform.rotate(image_1, p1.angle), (p1.x,p1.y))
+        win.blit(pygame.transform.rotate(image_1, p2.angle), (p2.x,p2.y))
         carve_out_maze(win, map)
         pygame.display.update()
 
