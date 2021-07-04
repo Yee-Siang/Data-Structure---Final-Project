@@ -28,7 +28,7 @@ data_dic = {}                     #在線成員的資料
 game_start = False                #統一進行遊戲
 game_start_time = 0
 current_time = 0
-game_time = 5                     #遊戲進行的時間
+game_time = 30                     #遊戲進行的時間
 state = "wait_for_pair"           #server目前的狀態
 
 def threaded_client(conn, id):
@@ -46,14 +46,14 @@ def threaded_client(conn, id):
                 break
             else:
                 try:
-                    if game_start :
+                    if game_start and client_state != "game_over" :
                         #所有人正在玩遊戲
                         p = connected[id][1]
                         gameId = connected[id][2]
                         game = games[gameId]
                         map = maps[gameId]
                         client_state = "playing"
-                    else:
+                    elif not game_start:
                         client_state = "wait_for_pair"
                 except:
                     if game_start :
@@ -63,7 +63,8 @@ def threaded_client(conn, id):
                 if data.method == "message":
                     pass
                 elif data.method == "get_game":
-                    game.players[p] = data.information
+                    game.players[p] = data.information[0]
+                    game.bullet[p] = data.information[1]###
                     game.state = client_state
                     conn.sendall(pickle.dumps(game))
                 elif data.method == "get_map":
@@ -72,6 +73,10 @@ def threaded_client(conn, id):
                     conn.sendall(pickle.dumps(client_state))
                 elif data.method == "get_p":
                     conn.sendall(pickle.dumps(p))
+                elif data.method == "game_over":
+                    client_state = "game_over"
+                    game.over = True
+                    conn.sendall(pickle.dumps(client_state))
                     
         except Exception as e:
             print(e)
@@ -146,7 +151,7 @@ while True:
 
         current_time = time.time()
         pass_time = current_time - game_start_time
-        print("在線人數:",idCount)
+        #print("在線人數:",idCount)
         if pass_time >= game_time and game_start:
             #遊戲時間結束
             state = "wait_for_pair"
@@ -158,3 +163,4 @@ while True:
             break
 print("SERVER CRASHED")
     
+

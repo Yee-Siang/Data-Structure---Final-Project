@@ -1,9 +1,9 @@
-class Player(object):
+class bullet(object):
     def __init__(self,x,y,width,height):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.vel = 1
+        self.vel = 2
         self.angle = 0
-        self.health = 5
+        self.show = False
