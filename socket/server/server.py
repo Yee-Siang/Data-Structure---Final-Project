@@ -5,6 +5,7 @@ import time
 from game import Game
 from maze import maze
 from user_and_pair import *
+from pairing import pairing_process
 
 server = "192.168.1.101"
 port = 5555
@@ -29,7 +30,7 @@ data_dic = {}                     #在線成員的資料
 game_start = False                #統一進行遊戲
 game_start_time = 0
 current_time = 0
-game_time = 30                    #遊戲進行的時間
+game_time = 100                    #遊戲進行的時間
 state = "wait_for_pair"           #server目前的狀態
 
 def threaded_client(conn, id):
@@ -96,10 +97,12 @@ def threaded_client(conn, id):
 def make_pair(data_dic):
     pair_list = []
     value_list = list(data_dic.values())
-    for i in range(0,len(value_list),2):
-        pair_tup = (value_list[i]["id"],value_list[i+1]["id"])
-        pair_list.append(pair_tup)
+    results = pairing_process(value_list, 'paired_data.json', 'user_data.json')
 
+    for element in results:
+        if not (value_list[element[1]].id, value_list[element[0]].id) in pair_list:
+            pair_list.append((value_list[element[0]].id, value_list[element[1]].id))
+        
     return pair_list
 
 def wait_for_connection():
@@ -116,7 +119,7 @@ def wait_for_connection():
             
             if personal_data["method"] == "new_user":
                 new_user = personal_data["information"]
-                personal_data = {"id":new_user.id}
+                personal_data = new_user
             elif personal_data["method"] == "passcode":
                 id = personal_data["information"]
                 personal_data = {"id":id}
@@ -124,7 +127,7 @@ def wait_for_connection():
 
             print(f"[CONNECTION] {addr} connected to the server at {time.time()}")
 
-            id = personal_data["id"]
+            id = personal_data.id
             data_dic[id] = personal_data
             connected[id] = [conn, None, None]
             start_new_thread(threaded_client, (conn, id))
@@ -162,7 +165,7 @@ while True:
 
         current_time = time.time()
         pass_time = current_time - game_start_time
-        #print("在線人數:",idCount)
+        print("在線人數:",idCount)
         if pass_time >= game_time and game_start:
             #遊戲時間結束
             state = "wait_for_pair"

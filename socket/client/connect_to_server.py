@@ -4,6 +4,7 @@ import math
 from Player import Player
 from Data import Data
 from bullet import bullet
+from sys import exit
 
 
 def connect_to_server(personal_data):
@@ -186,7 +187,11 @@ def connect_to_server(personal_data):
 
                     pygame.quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    pass
+                    ###arrow
+                    bullet1.x = p1.x
+                    bullet1.y = p1.y
+                    bullet1.angle = p1.angle
+                    bullet1.show = True
 
             #game1 character
             keys = pygame.key.get_pressed()
@@ -198,15 +203,14 @@ def connect_to_server(personal_data):
                 p1.y -= p1.vel
             elif keys[pygame.K_s] and p1.y < height - p1.width - p1.vel and if_edge_down(p1, wall_horizontal):
                 p1.y += p1.vel
+            elif keys[pygame.K_ESCAPE]:
+                pygame.quit()
+                exit()
+
             pos = pygame.mouse.get_pos()
             dx = pos[0] - (p1.x+p1.width)
             dy = pos[1] - (p1.y+p1.height)
             p1.angle = math.atan2(-dy,dx)*180/math.pi
-            if keys[pygame.K_e]:###arrow
-                bullet1.x = p1.x
-                bullet1.y = p1.y
-                bullet1.angle = p1.angle
-                bullet1.show = True
             if if_edge_arrow(bullet1, wall_horizontal, wall_verticl) and bullet1.show:
                 bullet1.x += bullet1.vel*math.cos(-bullet1.angle/180*math.pi)
                 bullet1.y += bullet1.vel*math.sin(-bullet1.angle/180*math.pi)
@@ -266,6 +270,14 @@ def connect_to_server(personal_data):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
+                        n.client.close()
+                        break
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_ESCAPE]:
+                    pygame.quit()
+                    n.client.close()
+                    exit()
+
             elif reply == "game_over":
                 #遊戲結束了 要等下一輪
                 myfont = pygame.font.Font(None,60)
@@ -275,7 +287,11 @@ def connect_to_server(personal_data):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
-
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_ESCAPE]:
+                    pygame.quit()
+                    n.client.close()
+                    exit()
             else:
                 #不知道甚麼bug
                 pygame.quit()
@@ -286,6 +302,7 @@ def connect_to_server(personal_data):
             pygame.quit()
             n.client.close()
             break 
+        
 
 if __name__  == '__main__':
     personal_data = input("請輸入您的id:")

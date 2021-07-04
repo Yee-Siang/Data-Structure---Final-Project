@@ -19,6 +19,7 @@ class user():
         self.ideal_age = ideal_age
         self.left_child = None
         self.right_child = None
+        self.height = 0
         self.paired = []
         self.paired_id = []
 
