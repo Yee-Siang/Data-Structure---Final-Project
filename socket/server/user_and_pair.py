@@ -11,6 +11,8 @@ class user():
         if identity == None:
             self.id = ls[0]
             del ls[0]
+        else:
+            self.id = identity
         self.name = name
         self.age = int(age)
         self.gender = gender

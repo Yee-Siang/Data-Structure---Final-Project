@@ -1,10 +1,12 @@
 import pygame
-from network import Network
 import math
+import time
+from network import Network
 from Player import Player
 from Data import Data
 from bullet import bullet
 from sys import exit
+
 
 
 def connect_to_server(personal_data):
@@ -56,6 +58,13 @@ def connect_to_server(personal_data):
             win.blit(pygame.transform.rotate(image_2, 0), (width-40-i*20, 10))
         for i in range(p2.health):
             win.blit(pygame.transform.rotate(image_2, 0), (20+i*20, 10))
+
+        #倒數計時
+        Remaining = game_start_time + game_time - time.time()
+        myfont = pygame.font.Font(None,40)
+        textImage = myfont.render("Remaining:" + str(int(Remaining)), True, (0, 0, 255), (128,128,128))
+        win.blit(textImage, (width/2 - textImage.get_width()/2,8))
+        
         carve_out_maze(win, map)
         pygame.display.update()
 
@@ -153,6 +162,15 @@ def connect_to_server(personal_data):
             data = Data("get_map",None)
             map = n.send(data)
             wall_horizontal, wall_verticl = construct_wall(map)
+
+            
+            #拿到遊戲開始的時間
+            global game_time
+            global game_start_time
+            data = Data("get_game_time",None)
+            game_time, game_start_time = n.send(data)
+            
+            
             
 
             if player == 0:# 我是player1
@@ -246,10 +264,14 @@ def connect_to_server(personal_data):
             
     
     #connect_to_server
-    run = True
     clock = pygame.time.Clock()
     n = Network(personal_data)
+    global game_time
+    global game_start_time
+    game_time = 0
+    game_start_time = 0
     playing = False
+
 
     #client問server遊戲開始了沒
     while True :
@@ -281,8 +303,15 @@ def connect_to_server(personal_data):
             elif reply == "game_over":
                 #遊戲結束了 要等下一輪
                 myfont = pygame.font.Font(None,60)
-                textImage = myfont.render("game over", True, (0, 0, 255), (255, 255, 255))
-                win.blit(textImage, (100,100))
+                textImage = myfont.render("Game Over!!", True, (255, 0, 0), (128,128,128))
+                win.blit(textImage, (width/2 - textImage.get_width()/2, height/2 - textImage.get_height()/2))
+
+                #倒數計時
+                Remaining = game_start_time + game_time - time.time()
+                myfont = pygame.font.Font(None,40)
+                textImage = myfont.render("Remaining:" + str(int(Remaining)), True, (0, 0, 255), (128,128,128))
+                win.blit(textImage, (width/2 - textImage.get_width()/2,8))
+                
                 pygame.display.update()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:

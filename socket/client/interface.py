@@ -59,7 +59,6 @@ def main():
                 state = 3
         if event.type == pygame.KEYDOWN and state == 2:
             key = event.dict["key"]
-            print(key)
             if len(word) < 7:
                 if key == 1073741913:
                     word += '1'

@@ -6,6 +6,7 @@ from game import Game
 from maze import maze
 from user_and_pair import *
 from pairing import pairing_process
+from search import *
 
 server = "192.168.1.101"
 port = 5555
@@ -79,6 +80,8 @@ def threaded_client(conn, id):
                     client_state = "game_over"
                     game.over = True
                     conn.sendall(pickle.dumps(client_state))
+                elif data.method == "get_game_time":
+                    conn.sendall(pickle.dumps((game_time, game_start_time)))
                     
         except Exception as e:
             print(e)
@@ -122,7 +125,8 @@ def wait_for_connection():
                 personal_data = new_user
             elif personal_data["method"] == "passcode":
                 id = personal_data["information"]
-                personal_data = {"id":id}
+                user = btree_search(id, reborn_tree)
+                personal_data = user
 
 
             print(f"[CONNECTION] {addr} connected to the server at {time.time()}")
@@ -136,6 +140,8 @@ def wait_for_connection():
             print("[EXCEPTION]", e)
             break
     print("SERVER CRASHED")
+
+reborn_tree = btree_reload('storage.json')
 
 start_new_thread(wait_for_connection, ())
 
