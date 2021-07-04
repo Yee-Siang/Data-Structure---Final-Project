@@ -12,6 +12,7 @@ def connect_to_server(personal_data):
     width = 800
     height = 800
     win = pygame.display.set_mode((width, height))
+    pygame.display.update()
     cell_width = 37
     cell_height = 37
 

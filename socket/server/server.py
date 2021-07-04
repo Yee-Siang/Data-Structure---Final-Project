@@ -4,6 +4,7 @@ import pickle
 import time
 from game import Game
 from maze import maze
+from user_and_pair import *
 
 server = "192.168.1.101"
 port = 5555
@@ -28,7 +29,7 @@ data_dic = {}                     #在線成員的資料
 game_start = False                #統一進行遊戲
 game_start_time = 0
 current_time = 0
-game_time = 30                     #遊戲進行的時間
+game_time = 30                    #遊戲進行的時間
 state = "wait_for_pair"           #server目前的狀態
 
 def threaded_client(conn, id):
@@ -111,6 +112,16 @@ def wait_for_connection():
         try:
             conn, addr = s.accept()
             personal_data = pickle.loads(conn.recv(2048*2))
+            print(personal_data)
+            
+            if personal_data["method"] == "new_user":
+                new_user = personal_data["information"]
+                personal_data = {"id":new_user.id}
+            elif personal_data["method"] == "passcode":
+                id = personal_data["information"]
+                personal_data = {"id":id}
+
+
             print(f"[CONNECTION] {addr} connected to the server at {time.time()}")
 
             id = personal_data["id"]
