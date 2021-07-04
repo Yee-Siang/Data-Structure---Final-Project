@@ -82,6 +82,8 @@ def threaded_client(conn, id):
                     conn.sendall(pickle.dumps(client_state))
                 elif data.method == "get_game_time":
                     conn.sendall(pickle.dumps((game_time, game_start_time)))
+                elif data.method == "get_users":
+                    conn.sendall(pickle.dumps(game.users))
                     
         except Exception as e:
             print(e)
@@ -156,7 +158,9 @@ while True:
                 p1_id = pair_list[i][0]
                 p2_id = pair_list[i][1]
 
-                games[i] = Game(i)
+                game = Game(i)
+                game.users = [data_dic[p1_id],data_dic[p2_id]]
+                games[i] = game
                 maps[i] = maze().create()
                 print("Creating a new game...")
 

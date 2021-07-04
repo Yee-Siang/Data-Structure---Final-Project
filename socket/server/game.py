@@ -5,4 +5,5 @@ class Game:
         self.chatroom = []
         self.players = [None, None]
         self.bullet = [None,None]
+        self.users = [None, None]
 

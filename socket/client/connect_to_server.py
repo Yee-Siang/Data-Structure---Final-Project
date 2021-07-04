@@ -169,6 +169,15 @@ def connect_to_server(personal_data):
             global game_start_time
             data = Data("get_game_time",None)
             game_time, game_start_time = n.send(data)
+
+            #拿到user資料
+            data = Data("get_users",None)
+            user1, user2 = n.send(data)
+            if player == 0:# 我是user1
+                print(user1.name)
+                
+            else:          # 我是user2
+                print(user2.name)
             
             
             
