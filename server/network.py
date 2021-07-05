@@ -3,12 +3,11 @@ import pickle
 
 
 class Network:
-    def __init__(self,personal_data):
+    def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = "192.168.1.101"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.connect(personal_data)
 
     def connect(self,personal_data):
         try:

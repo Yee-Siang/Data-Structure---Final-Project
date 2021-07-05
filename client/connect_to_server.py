@@ -1,7 +1,6 @@
 import pygame
 import math
 import time
-from network import Network
 from Player import Player
 from Data import Data
 from bullet import bullet
@@ -9,7 +8,7 @@ from sys import exit
 
 
 
-def connect_to_server(personal_data):
+def connect_to_server(n):
     pygame.font.init()
 
     width = 800
@@ -308,7 +307,6 @@ def connect_to_server(personal_data):
     
     #connect_to_server
     clock = pygame.time.Clock()
-    n = Network(personal_data)
     global game_time
     global game_start_time
     game_time = 0

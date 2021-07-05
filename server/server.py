@@ -127,17 +127,21 @@ def wait_for_connection():
                 personal_data = new_user
             elif personal_data["method"] == "passcode":
                 id = personal_data["information"]
-                user = btree_search(id, reborn_tree)
+                try:
+                    user = btree_search(id, reborn_tree)
+                except:
+                    user = None
                 personal_data = user
 
-
-            print(f"[CONNECTION] {addr} connected to the server at {time.time()}")
-
-            id = personal_data.id
-            data_dic[id] = personal_data
-            connected[id] = [conn, None, None]
-            start_new_thread(threaded_client, (conn, id))
-            idCount += 1
+            if personal_data == None :
+                conn.send(str.encode(str("id does not exist")))
+            else:
+                print(f"[CONNECTION] {addr} connected to the server at {time.time()}")
+                id = personal_data.id
+                data_dic[id] = personal_data
+                connected[id] = [conn, None, None]
+                start_new_thread(threaded_client, (conn, id))
+                idCount += 1
         except Exception as e:
             print("[EXCEPTION]", e)
             break

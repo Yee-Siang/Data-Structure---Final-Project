@@ -1,6 +1,7 @@
 import pygame
 from user_and_pair import *
 from connect_to_server import connect_to_server
+from network import Network
 
 def main():
     pygame.init()
@@ -270,10 +271,19 @@ def main():
             new_id_display = font.render(str(new_user.id), True, (0, 0, 0))
             main_surface.blit(new_id_display, (250, 465))
         pygame.display.flip()
-    #pygame.quit()
     return personal_data
 
-personal_data = main()
-if personal_data:
-    connect_to_server(personal_data)
+
+while True:
+    personal_data = main()
+    if personal_data:
+        n = Network()
+        reply = n.connect(personal_data)
+        if reply == "success":
+            break
+        print(reply)
+connect_to_server(n)
+
+
+    
 
