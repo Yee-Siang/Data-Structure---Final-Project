@@ -22,7 +22,7 @@ class user():
         self.left_child = None
         self.right_child = None
         self.height = 0
-        self.paired = []
+    #    self.paired = []
         self.paired_id = []
 
     def difference(self, other):
@@ -30,7 +30,7 @@ class user():
         if self == other:
             return 100000
 
-        if other in self.paired:
+        if other.id in self.paired_id:
             return 100000
 
         val = 0
