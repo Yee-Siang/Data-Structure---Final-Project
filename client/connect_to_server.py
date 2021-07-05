@@ -28,6 +28,13 @@ def connect_to_server(personal_data):
     #劍的圖片
     image_3 = pygame.image.load('image/arrow.png')
     image_3 = pygame.transform.scale(image_3, (30, 30))
+    #男生的圖片
+    boy_image = pygame.image.load('image/boy.png')
+
+    #女生的圖片
+    girl_image = pygame.image.load('image/girl.png')
+    girl_image = pygame.transform.scale(girl_image, (300, 424))
+
 
     pygame.display.set_caption("Client")
 
@@ -173,11 +180,38 @@ def connect_to_server(personal_data):
             #拿到user資料
             data = Data("get_users",None)
             user1, user2 = n.send(data)
+
+            win.fill((128,128,128))
             if player == 0:# 我是user1
                 print(user1.name)
+                if user2.gender == "male":
+                    win.blit(boy_image, (0, height/2 - boy_image.get_height()/2 ))
+                else:
+                    win.blit(girl_image, (0, girl_image.get_height()/2))
+                matching = user2
                 
             else:          # 我是user2
                 print(user2.name)
+                if user1.gender == "male":
+                    win.blit(boy_image, (0, height/2 - boy_image.get_height()/2 ))
+                else:
+                    win.blit(girl_image, (0, girl_image.get_height()/2))
+                matching = user1
+            
+            font = pygame.font.Font(None,60)
+            text = font.render("Matching~", True, (0, 0, 0), (128,128,128))
+            win.blit(text, (width/2 , 3*height/10 ))
+            font = pygame.font.Font(None,40)
+            text = font.render("Name : " + str(matching.name), True, (255, 127, 80), (128,128,128))
+            win.blit(text, (width/2 , 4*height/10 ))
+            text = font.render("Age : " + str(matching.age), True, (255, 127, 80), (128,128,128))
+            win.blit(text, (width/2 , 5*height/10 ))
+            text = font.render("Gender : " + str(matching.gender), True, (255, 127, 80), (128,128,128))
+            win.blit(text, (width/2 , 6*height/10 ))
+
+
+            pygame.display.update()
+            pygame. time. delay(4000)
             
             
             
@@ -318,10 +352,12 @@ def connect_to_server(personal_data):
                 #倒數計時
                 Remaining = game_start_time + game_time - time.time()
                 myfont = pygame.font.Font(None,40)
-                textImage = myfont.render("Remaining:" + str(int(Remaining)), True, (0, 0, 255), (128,128,128))
+                textImage = myfont.render("Remaining:" + str(int(Remaining)), True, (0, 0, 255), (128, 128, 128))
                 win.blit(textImage, (width/2 - textImage.get_width()/2,8))
                 
                 pygame.display.update()
+                pygame.draw.rect(win, (128, 128, 128), [width/2 - textImage.get_width()/2, 8, textImage.get_width(), textImage.get_height()], 0)
+
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()

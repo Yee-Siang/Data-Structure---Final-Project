@@ -31,7 +31,7 @@ data_dic = {}                     #在線成員的資料
 game_start = False                #統一進行遊戲
 game_start_time = 0
 current_time = 0
-game_time = 100                    #遊戲進行的時間
+game_time = 105                   #遊戲進行的時間
 state = "wait_for_pair"           #server目前的狀態
 
 def threaded_client(conn, id):
