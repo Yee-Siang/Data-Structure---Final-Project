@@ -1,6 +1,13 @@
 # Data-Structure---Final-Project
 A simplified social network for meeting, coupling, and making friends
 
+## 前置作業
+若要在單台電腦上進行使用，要先把server/server.py還有server/network.py還有client/network.py三個檔案的ip改成自己的ip
+執行server/server.py
+再執行client/interface.py，即可開始使用
+
+
+
 ## 介面操作 (前台)
 在一開始，我們會提供兩個選擇給用戶: 登入 or 註冊
 ### 註冊
