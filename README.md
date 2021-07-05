@@ -22,5 +22,7 @@ gender要讓使使用者填入自己的性別，interest是選擇自己興趣的
 
 ## 時間複雜度作圖
 Open Directory -> Time Analysis
-(1) AVL Tree : By typing the command python avltree_analysis.py
-(2) Binary Tree : By typing the command python btree_analysis.py
+#### AVL Tree  
+By typing the command python avltree_analysis.py
+#### Binary Tree 
+By typing the command python btree_analysis.py
