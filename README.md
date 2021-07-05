@@ -19,3 +19,8 @@ gender要讓使使用者填入自己的性別，interest是選擇自己興趣的
 ## 資料蒐集與整理 (後台)
 在後台架設好後，首先要做的事情是:載入過去的使用者資料。因此，我們需要先進行reload動作，將過去使用者的資訊從 storage.json 中抓取下來。
 抓取後重新把用戶id大小排到binary tree裡(也寫好了avl tree的實作)，當用戶登入時，就從tree中做search即可獲取該用戶之資料
+
+## 時間複雜度作圖
+Open Directory -> Time Analysis
+(1) AVL Tree : By typing the command python avltree_analysis.py
+(2) Binary Tree : By typing the command python btree_analysis.py
